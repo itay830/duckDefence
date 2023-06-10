@@ -49,7 +49,7 @@ class RightTile(MockTile):
         ...
 
 
-def manual_place(tiles: set[Tile]) -> None:
+def manual_place(tiles: list[list[Tile]]) -> None:
     mouse_pos = pygame.mouse.get_pos()
     mouse_pressed = pygame.mouse.get_pressed()[0]
     for row in tiles:
@@ -61,3 +61,23 @@ def manual_place(tiles: set[Tile]) -> None:
 
             else:
                 tile.surf.set_alpha(255)
+
+
+class TileMap:
+    def __init__(self, tile_map: list[list[Tile]]):
+        self.map = tile_map
+
+        self.constSurfMap = pygame.Surface((0, 0))
+
+    def draw_tiled_map(self, display: pygame.Surface) -> pygame.Surface:
+        for row in self.map:
+            for tile in row:
+                display.blit(tile.surf, tile.rect)
+
+        return display
+
+    def draw_const_map(self, display: pygame.Surface) -> None:
+        display.blit(self.constSurfMap, (0, 0))
+
+    def create_map_image(self, width: int, height: int) -> None:
+        self.constSurfMap = self.draw_tiled_map(pygame.Surface((width, height)))

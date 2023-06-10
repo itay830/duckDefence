@@ -2,6 +2,7 @@ import pygame
 from sys import exit
 from buttonClass import Button
 from tileClass import Tile, manual_place, RightTile
+from pickleData import *
 
 WIDTH, HEIGHT = 1900, 1050
 CENTER = (WIDTH // 2, HEIGHT // 2)
@@ -15,7 +16,7 @@ def quit_game():
 
 
 startButton = Button(pygame.Surface((400, 250)), CENTER)
-
+createMapButton = Button(pygame.Surface((200, 200)), (400, 400))
 
 def draw_axis(steps):
     for x in range(0, WIDTH, steps):
@@ -26,12 +27,8 @@ def draw_axis(steps):
 
 
 step = 50
-'''tiles = [Tile(pos=(x, y), surf=pygame.Surface((step, step)), color=(0, 125, 0)) for x in range(0, WIDTH, step) for y in
-         range(0, HEIGHT, step)]'''
 
 tiles = [[Tile(pos=(x, y), surf=pygame.Surface((step, step)), color=(0, 125, 0)) for y in range(0, HEIGHT, step)] for x in range(0, WIDTH, step)]
-print(len(tiles), len(tiles[0]))
-tiles[15][18].set_sub_tile(RightTile(tiles[15][18]))
 
 clock = pygame.time.Clock()
 FPS = 60
@@ -43,11 +40,14 @@ while 1:
             quit_game()
 
     if gameState == 'menu':
-        startButton.draw(display)
         if startButton.check_click_state_surf():
-            gameState = 'lvl1'
+            gameState = 'lv1'
+        if createMapButton.check_click_state_surf():
+            gameState = 'mapCreator'
+        startButton.draw(display)
+        createMapButton.draw(display)
 
-    if gameState == 'lvl1':
+    if gameState == 'mapCreator':
         draw_axis(step)
         manual_place(tiles)
 
