@@ -1,6 +1,6 @@
 import pygame
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Union
 
 pygame.font.init()
 
@@ -8,14 +8,13 @@ font = pygame.font.SysFont("verdana", 10, True, False)
 
 
 class Tile:
-    def __init__(self, pos: tuple[int, int], surf: pygame.Surface, color):
+    def __init__(self, pos: Union[tuple[int, int], pygame.Vector2], surf: pygame.Surface, color):
         self.size = surf.get_width()
         self.surf = surf
         self.surf.fill(color)
         self.rect = self.surf.get_rect(topleft=pos)
-        self.txt = font.render(f"({pos[0]//self.size}, {pos[1]//self.size})", False, (255, 255, 255))
+        self.txt = font.render(f"({int(pos[0]) // self.size}, {int(pos[1]) // self.size})", False, (255, 255, 255))
         self.txtRect = self.txt.get_rect(center=self.rect.center)
-        self.subTile = self
 
     def draw(self, display: pygame.Surface):
         display.blit(self.surf, self.rect)
@@ -65,19 +64,46 @@ def manual_place(tiles: list[list[Tile]]) -> None:
 
 class TileMap:
     def __init__(self, tile_map: list[list[Tile]]):
-        self.map = tile_map
+        self.tiles = tile_map
 
         self.constSurfMap = pygame.Surface((0, 0))
 
     def draw_tiled_map(self, display: pygame.Surface) -> pygame.Surface:
-        for row in self.map:
+        for row in self.tiles:
             for tile in row:
-                display.blit(tile.surf, tile.rect)
+                tile.draw(display)
 
-        return display
+        return display.copy()
 
     def draw_const_map(self, display: pygame.Surface) -> None:
         display.blit(self.constSurfMap, (0, 0))
 
     def create_map_image(self, width: int, height: int) -> None:
         self.constSurfMap = self.draw_tiled_map(pygame.Surface((width, height)))
+
+    def get_tile(self, pos: Union[pygame.Vector2, tuple[int, int]]) -> Tile:
+        return self.tiles[int(pos[1])][int(pos[0])]
+
+
+def create_map_with_csv(csv_data: list[list[str]], step: int) -> TileMap:
+    tiles = []
+    offset = pygame.Vector2(0, 0)
+
+    for row in csv_data:
+        tile_row = []
+        for index in row:
+            index = int(index)
+            if index == 0:
+                tile = Tile(offset, pygame.Surface((step, step)), (0, 128, 0))
+                tile_row.append(tile)
+
+            if index == 1:
+                tile = Tile(offset, pygame.Surface((step, step)), (0, 128, 0))
+                tile.set_sub_tile(RightTile(tile))
+                tile_row.append(tile)
+            offset.x += step
+        tiles.append(tile_row)
+        offset.y += step
+        offset.x = 0
+
+    return TileMap(tiles)

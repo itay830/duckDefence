@@ -4,23 +4,15 @@ except ImportError:
     import pickle
 
 
-class Example:
-    int = 35
-    str = 'Itay'
-    list = [1, 2, 3]
-    set = {a for a in range(3, 6)}
+def load_data():
+    with open('resources/maps_data/maps.pkl', 'rb') as f:
+        data = pickle.load(f)
+    return data
 
 
-obj = Example()
+def save_data(*data):
+    with open('resources/maps_data/maps.pkl', 'wb') as f:
+        for sub_data in data:
+            pickle.dump(sub_data, f)
 
-pickle_obj = pickle.dumps(obj)
 
-print(f"My obj:\n{pickle_obj}\n")
-
-obj.int = 36
-
-un_pickle = pickle.loads(pickle_obj)
-
-print(
-    f"int of unpickle is:\n{un_pickle.int}"
-)
