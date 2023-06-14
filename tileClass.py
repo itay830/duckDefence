@@ -15,6 +15,7 @@ class Tile:
         self.rect = self.surf.get_rect(topleft=pos)
         self.txt = font.render(f"({int(pos[0]) // self.size}, {int(pos[1]) // self.size})", False, (255, 255, 255))
         self.txtRect = self.txt.get_rect(center=self.rect.center)
+        self.subTile = BlankTile(self)
 
     def draw(self, display: pygame.Surface):
         display.blit(self.surf, self.rect)
@@ -39,27 +40,21 @@ class MockTile(ABC):
         self.tile.surf.fill(color)
 
 
-class RightTile(MockTile):
+class BlankTile(MockTile):
+    def __init__(self, tile):
+        MockTile.__init__(self, tile)
+
+    def logic(self) -> None:
+        return
+
+
+class MoveTile(MockTile):
     def __init__(self, tile: Tile):
         MockTile.__init__(self, tile)
         self.get_dressed((255, 0, 125))
 
     def logic(self):
         ...
-
-
-def manual_place(tiles: list[list[Tile]]) -> None:
-    mouse_pos = pygame.mouse.get_pos()
-    mouse_pressed = pygame.mouse.get_pressed()[0]
-    for row in tiles:
-        for tile in row:
-            if tile.rect.collidepoint(mouse_pos):
-                tile.surf.set_alpha(125)
-                if mouse_pressed:
-                    tile.set_sub_tile(RightTile(tile))
-
-            else:
-                tile.surf.set_alpha(255)
 
 
 class TileMap:
@@ -99,7 +94,7 @@ def create_map_with_csv(csv_data: list[list[str]], step: int) -> TileMap:
 
             if index == 1:
                 tile = Tile(offset, pygame.Surface((step, step)), (0, 128, 0))
-                tile.set_sub_tile(RightTile(tile))
+                tile.set_sub_tile(MoveTile(tile))
                 tile_row.append(tile)
             offset.x += step
         tiles.append(tile_row)
@@ -107,3 +102,20 @@ def create_map_with_csv(csv_data: list[list[str]], step: int) -> TileMap:
         offset.x = 0
 
     return TileMap(tiles)
+
+
+def manual_place(tiles: list[list[Tile]]) -> None:
+    mouse_pos = pygame.mouse.get_pos()
+    for row in tiles:
+        for tile in row:
+            if tile.rect.collidepoint(mouse_pos):
+                tile.surf.set_alpha(125)
+                if isinstance(tile.subTile, BlankTile):
+                    tile.set_sub_tile(MoveTile(tile))
+
+                else:
+                    tile.set_sub_tile(BlankTile(tile))
+                    tile.surf.fill((0, 128, 0))
+
+            else:
+                tile.surf.set_alpha(255)

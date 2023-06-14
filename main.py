@@ -1,7 +1,7 @@
 import pygame
 from sys import exit
 from buttonClass import Button
-from tileClass import Tile, manual_place, RightTile, create_map_with_csv
+from tileClass import Tile, manual_place, MoveTile, create_map_with_csv
 import pickleData
 import csvData
 
@@ -34,7 +34,7 @@ step = 50
 
 map = create_map_with_csv(csvData.load_data(), step)
 
-
+pygame.mouse.set_cursor(pygame.cursors.broken_x)
 clock = pygame.time.Clock()
 FPS = 60
 while 1:
@@ -43,6 +43,13 @@ while 1:
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             quit_game()
+
+        if gameState == 'mapCreator':
+            if e.type == pygame.MOUSEBUTTONUP:
+                manual_place(map.tiles)
+                print(1)
+    #pygame.mouse.
+
 
     if gameState == 'menu':
         if startButton.check_click_state_surf():
@@ -54,7 +61,7 @@ while 1:
 
     if gameState == 'mapCreator':
         draw_axis(step)
-        manual_place(map.tiles)
+        #manual_place(map.tiles)
         map.draw_tiled_map(display)
 
 
